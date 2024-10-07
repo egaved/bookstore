@@ -6,10 +6,14 @@ import 'package:flutter/material.dart';
 */
 
 class StationeryModel {
-  String name;
-  double price;
-  int quantity;
+  final int id;
+  final String name;
+  final double price;
+  final int quantity;
 
   StationeryModel(
-      {required this.name, required this.price, required this.quantity});
+      {required this.id,
+      required this.name,
+      required this.price,
+      required this.quantity});
 }

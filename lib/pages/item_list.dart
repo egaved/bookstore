@@ -48,39 +48,27 @@ class _ItemListPageState extends State<ItemListPage> {
       backgroundColor: Colors.white,
       elevation: 0.0,
       centerTitle: true,
-      leading: InkWell(
-        onTap: () {
-          Navigator.of(context).pop();
-        },
-        child: Container(
-          margin: EdgeInsets.all(10),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-              color: Color(0xffff7f8f8),
-              borderRadius: BorderRadius.circular(10)),
-          child: SvgPicture.asset(
-            'assets/icons/Arrow - Left 2.svg',
-            height: 20,
-            width: 20,
-          ),
-        ),
-      ),
+      // leading: InkWell(
+      //   onTap: () {
+      //     Navigator.of(context).pop();
+      //   },
+      //   child: Container(
+      //     margin: EdgeInsets.all(10),
+      //     alignment: Alignment.center,
+      //     decoration: BoxDecoration(
+      //         color: Color(0xffff7f8f8),
+      //         borderRadius: BorderRadius.circular(10)),
+      //     child: SvgPicture.asset(
+      //       'assets/icons/Arrow - Left 2.svg',
+      //       height: 20,
+      //       width: 20,
+      //     ),
+      //   ),
+      // ),
       actions: [
-        InkWell(
-          onTap: () {},
-          child: Container(
-            margin: EdgeInsets.all(10),
-            alignment: Alignment.center,
-            width: 37,
-            decoration: BoxDecoration(
-                color: Color(0xffff7f8f8),
-                borderRadius: BorderRadius.circular(10)),
-            child: SvgPicture.asset(
-              'assets/icons/dots.svg',
-              height: 5,
-              width: 5,
-            ),
-          ),
+        IconButton(
+          onPressed: () {},
+          icon: SvgPicture.asset('assets/icons/search-bold.svg'),
         ),
       ],
     );
