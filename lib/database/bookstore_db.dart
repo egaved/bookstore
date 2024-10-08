@@ -47,4 +47,9 @@ class BookstoreDB {
         ''', [id]);
     return BookModel.fromSqfliteDB(book.first);
   }
+
+  Future<void> delete(int id) async {
+    final database = await DatabaseService().database;
+    await database.rawDelete('''DELETE FROM $tableName WHERE id = ?''', [id]);
+  }
 }
