@@ -3,13 +3,13 @@
   товара в магазине
 */
 
-class StationeryModel {
+class Stationery {
   final int id;
   final String name;
   final double price;
   final int quantity;
 
-  StationeryModel(
+  Stationery(
       {required this.id,
       required this.name,
       required this.price,

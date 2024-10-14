@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_practice/models/book_model.dart';
+import 'package:flutter_practice/models/book.dart';
 
 class CreateBookWidget extends StatefulWidget {
-  final BookModel? bookModel;
+  final Book? bookModel;
   final ValueChanged<String> onSumbit;
 
   const CreateBookWidget({

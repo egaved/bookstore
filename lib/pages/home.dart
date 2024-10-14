@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_practice/models/category_model.dart';
+import 'package:flutter_practice/models/category.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+// ignore: must_be_immutable
 class HomePage extends StatelessWidget {
   HomePage({super.key});
 
@@ -93,7 +94,7 @@ class HomePage extends StatelessWidget {
                   ),
                   onTap: () {
                     Navigator.of(context).pushNamed(
-                      '/itemlist',
+                      '/item_list',
                       arguments: categoryName,
                     );
                   },

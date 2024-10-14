@@ -1,35 +1,26 @@
 import 'dart:developer';
 
+import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_practice/database/bookstore_db.dart';
-import 'package:flutter_practice/models/book_model.dart';
+import 'package:flutter_practice/models/book.dart';
+import 'package:flutter_practice/utils/db_service.dart';
 import 'package:flutter_svg/svg.dart';
 
 class ItemListPage extends StatefulWidget {
   const ItemListPage({super.key});
-
   @override
   State<ItemListPage> createState() => _ItemListPageState();
 }
 
 class _ItemListPageState extends State<ItemListPage> {
   String? categoryName;
-  Future<List<BookModel>>? futureBooks;
-  final bookstoreDB = BookstoreDB();
-  int itemCount = 1;
+  late DbService dbService = DbService();
+  List<Book> bookList = List.empty(growable: true);
+  int itemCount = 0;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-
-    fetchBooks();
-  }
-
-  void fetchBooks() {
-    setState(() {
-      futureBooks = bookstoreDB.fetchAll();
-    });
   }
 
   @override
@@ -59,7 +50,6 @@ class _ItemListPageState extends State<ItemListPage> {
   }
 
   ListView? buildItemList() {
-    TextTheme titleStyle = Theme.of(context).textTheme;
     if (categoryName == 'Книги') {
       return ListView.builder(
         itemCount: itemCount,
@@ -68,38 +58,43 @@ class _ItemListPageState extends State<ItemListPage> {
               color: Colors.white,
               elevation: 2.0,
               child: ListTile(
-                  leading: Icon(Icons.book_rounded),
-                  title: Text(
-                    'Название. (Фамилия)',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.normal,
-                    ),
+                leading: Icon(Icons.book_rounded),
+                title: Text(
+                  'Название',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
                   ),
-                  subtitle: Text(
-                    'Жанр | На складе: 0',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
+                ),
+                subtitle: Text(
+                  'Фамилия | Жанр',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    color: Colors.grey,
+                    fontSize: 12,
                   ),
-                  trailing: Wrap(
-                    spacing: 10.0,
-                    children: [
-                      Text(
-                        '0.00 р.',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          color: Colors.grey,
-                          fontSize: 14,
-                        ),
+                ),
+                trailing: Wrap(
+                  spacing: 10.0,
+                  children: [
+                    Text(
+                      '0 ₽',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        color: Colors.grey,
+                        fontSize: 14,
                       ),
-                      Icon(Icons.delete, color: Colors.red),
-                    ],
-                  )));
+                    ),
+                  ],
+                ),
+                onTap: () {
+                  Navigator.of(context).pushNamed(
+                    '/item_info',
+                  );
+                },
+              ));
         },
       );
     }
@@ -109,7 +104,9 @@ class _ItemListPageState extends State<ItemListPage> {
   FloatingActionButton buildFloatingButton() {
     return FloatingActionButton(
       child: const Icon(Icons.add),
-      onPressed: () {},
+      onPressed: () {
+        Navigator.of(context).pushNamed('/add_item', arguments: categoryName);
+      },
     );
   }
 
@@ -131,5 +128,18 @@ class _ItemListPageState extends State<ItemListPage> {
         ),
       ],
     );
+  }
+
+  void updateListView() {
+    final Future<Database> dbFuture = dbService.initializeDb();
+    dbFuture.then((database) {
+      Future<List<Book>> bookListFuture = dbService.fetchAll();
+      bookListFuture.then((bookList) {
+        setState(() {
+          this.bookList = bookList;
+          this.itemCount = bookList.length;
+        });
+      });
+    });
   }
 }
