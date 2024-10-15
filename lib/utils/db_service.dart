@@ -1,26 +1,30 @@
 import 'package:flutter_practice/models/stationery.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_practice/models/book.dart';
 
 class DbService {
-  static late DbService _dbService;
-  static late Database _database;
-
-  DbService._createInstance();
+  static final DbService _instance = DbService._internal();
+  static Database? _database;
 
   factory DbService() {
-    if (_dbService == null) {
-      _dbService = DbService._createInstance();
-    }
-    return _dbService;
+    return _instance;
   }
 
-  Future<Database> initializeDb() async {
-    Directory directory = await getApplicationCacheDirectory();
-    String path = directory.path + 'bookstore.db';
+  DbService._internal();
+
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await initDatabase();
+    return _database!;
+  }
+
+  Future<Database> initDatabase() async {
+    final databasesPath = await getDatabasesPath();
+    final path = join(databasesPath, 'bookstore.db');
     var bookStoreDb = await openDatabase(path, version: 1, onCreate: _createDb);
     return bookStoreDb;
   }
@@ -35,13 +39,6 @@ class DbService {
       "quantity" INTEGER NOT NULL,
       PRIMARY KEY("id" AUTOINCREMENT)
     );""");
-  }
-
-  Future<Database> get database async {
-    if (_database == null) {
-      _database = await initializeDb();
-    }
-    return _database;
   }
 
   Future<List<Map<String, dynamic>>> getBookMapList() async {

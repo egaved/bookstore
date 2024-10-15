@@ -13,8 +13,7 @@ class Book {
   late int quantity;
 
   Book(
-      {required this.id,
-      required this.author,
+      {required this.author,
       required this.title,
       required this.genre,
       required this.price,
@@ -22,9 +21,7 @@ class Book {
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
-    if (id != null) {
-      map['id'] = id;
-    }
+
     map['author'] = author;
     map['title'] = title;
     map['genre'] = genre;

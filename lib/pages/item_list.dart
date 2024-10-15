@@ -51,6 +51,7 @@ class _ItemListPageState extends State<ItemListPage> {
 
   ListView? buildItemList() {
     if (categoryName == 'Книги') {
+      updateListView();
       return ListView.builder(
         itemCount: itemCount,
         itemBuilder: (context, index) {
@@ -131,7 +132,7 @@ class _ItemListPageState extends State<ItemListPage> {
   }
 
   void updateListView() {
-    final Future<Database> dbFuture = dbService.initializeDb();
+    final Future<Database> dbFuture = dbService.initDatabase();
     dbFuture.then((database) {
       Future<List<Book>> bookListFuture = dbService.fetchAll();
       bookListFuture.then((bookList) {
