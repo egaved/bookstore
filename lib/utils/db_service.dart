@@ -25,7 +25,8 @@ class DbService {
   Future<Database> initDatabase() async {
     final databasesPath = await getDatabasesPath();
     final path = join(databasesPath, 'bookstore.db');
-    var bookStoreDb = await openDatabase(path, version: 1, onCreate: _createDb);
+    var bookStoreDb = await openDatabase(path,
+        version: 2, onCreate: _createDb, onUpgrade: _upgradeDb);
     return bookStoreDb;
   }
 
@@ -41,9 +42,37 @@ class DbService {
     );""");
   }
 
+  void _upgradeDb(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute(''' CREATE TABLE IF NOT EXISTS stationery (
+      "id" INTEGER NOT NULL,
+      "name" TEXT NOT NULL,
+      "price" REAL NOT NULL,
+      "quantity" INTEGER NOT NULL,
+      PRIMARY KEY("id" AUTOINCREMENT)
+    );''');
+      await db.execute('''CREATE TABLE IF NOT EXISTS cart (
+        "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+        "product_id" INTEGER,
+        "product_type" TEXT,
+        "quantity" INTEGER,
+        FOREIGN KEY (product_id) REFERENCES book (id) 
+          ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES stationery (id) 
+          ON DELETE CASCADE
+    );''');
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getBookMapList() async {
     Database db = await database;
     var res = await db.query('book');
+    return res;
+  }
+
+  Future<List<Map<String, dynamic>>> getStationeryMapList() async {
+    Database db = await database;
+    var res = await db.query('stationery');
     return res;
   }
 
@@ -53,9 +82,21 @@ class DbService {
     return res;
   }
 
+  Future<int> createStationery(Stationery st) async {
+    var db = await database;
+    var res = await db.insert('stationery', st.toMap());
+    return res;
+  }
+
   Future<int> deleteBook(int id) async {
     var db = await database;
     int res = await db.rawDelete('''DELETE FROM book WHERE id = $id''');
+    return res;
+  }
+
+  Future<int> deleteStationery(int id) async {
+    var db = await database;
+    int res = await db.rawDelete('''DELETE FROM stationery WHERE id = $id''');
     return res;
   }
 
@@ -67,7 +108,15 @@ class DbService {
     return res;
   }
 
-  Future<List<Book>> fetchAll() async {
+  Future<int?> getStationeryAmount() async {
+    Database db = await database;
+    List<Map<String, dynamic>> x =
+        await db.rawQuery('''SELECT COUNT (*) FROM stationery''');
+    int? res = Sqflite.firstIntValue(x);
+    return res;
+  }
+
+  Future<List<Book>> fetchAllBooks() async {
     var bookMapList = await getBookMapList();
     int count = bookMapList.length;
 
@@ -78,5 +127,18 @@ class DbService {
     }
 
     return bookList;
+  }
+
+  Future<List<Stationery>> fetchAllStationery() async {
+    var stMapList = await getStationeryMapList();
+    int count = stMapList.length;
+
+    List<Stationery> stationeryList = List<Stationery>.empty(growable: true);
+
+    for (int i = 0; i < count; i++) {
+      stationeryList.add(Stationery.fromMapObject(stMapList[i]));
+    }
+
+    return stationeryList;
   }
 }

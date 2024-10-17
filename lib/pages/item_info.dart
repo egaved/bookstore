@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 class ItemInfoPage extends StatefulWidget {
@@ -8,6 +10,27 @@ class ItemInfoPage extends StatefulWidget {
 }
 
 class _ItemInfoState extends State<ItemInfoPage> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args == null) {
+      log('provide args');
+      return;
+    }
+    if (args is! String) {
+      log('provide string arg');
+      return;
+    }
+
+    setState(() {});
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
