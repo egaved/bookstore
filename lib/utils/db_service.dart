@@ -141,4 +141,52 @@ class DbService {
 
     return stationeryList;
   }
+
+  Future<void> addBookToCart(int bookId, int quantity) async {
+    final db = await database;
+    await db.insert(
+      'cart',
+      {'product_id': bookId, 'product_type': 'book', 'quantity': quantity},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> addStationeryToCart(int stationeryId, int quantity) async {
+    final db = await database;
+    await db.insert(
+      'cart',
+      {
+        'product_id': stationeryId,
+        'product_type': 'stationery',
+        'quantity': quantity
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Book>> fetchBooksByName(String query) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'book',
+      where: 'title LIKE ?',
+      whereArgs: ['%$query%'],
+    );
+
+    return List.generate(maps.length, (i) {
+      return Book.fromMapObject(maps[i]);
+    });
+  }
+
+  Future<List<Stationery>> fetchStationeryByName(String query) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'stationery',
+      where: 'name LIKE ?',
+      whereArgs: ['%$query%'],
+    );
+
+    return List.generate(maps.length, (i) {
+      return Stationery.fromMapObject(maps[i]);
+    });
+  }
 }

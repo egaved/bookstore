@@ -15,9 +15,12 @@ class ItemListPage extends StatefulWidget {
 
 class _ItemListPageState extends State<ItemListPage> {
   String? categoryName;
+
   late DbService dbService = DbService();
+
   List<Book> bookList = List.empty(growable: true);
   List<Stationery> stationeryList = List.empty(growable: true);
+
   int itemCount = 0;
 
   @override
@@ -44,25 +47,23 @@ class _ItemListPageState extends State<ItemListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(),
+      appBar: _buildAppBar(),
       backgroundColor: Colors.white,
-      body: buildItemList(),
+      body: Stack(
+        children: [
+          if (categoryName == 'Книги') ...[
+            _buildBookList(),
+          ] else if (categoryName == 'Канцелярия') ...[
+            _buildStationeryList(),
+          ],
+        ],
+      ),
       floatingActionButton: buildFloatingButton(),
     );
   }
 
-  ListView? buildItemList() {
-    if (categoryName == 'Книги') {
-      updateListView();
-      return _buildBookList();
-    } else if (categoryName == 'Канцелярия') {
-      updateListView();
-      return _buildStationeryList();
-    }
-    return null;
-  }
-
   ListView _buildStationeryList() {
+    updateListView();
     return ListView.builder(
       itemCount: itemCount,
       itemBuilder: (context, index) {
@@ -102,43 +103,28 @@ class _ItemListPageState extends State<ItemListPage> {
 
   Card stationeryCard(int index, BuildContext context) {
     return Card(
-        color: Colors.white,
-        elevation: 2.0,
-        child: ListTile(
-          leading: Icon(Icons.mode_edit),
-          title: Text(
-            stationeryList[index].name,
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              color: Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.normal,
-            ),
+      color: Color.fromARGB(255, 229, 195, 255),
+      margin: EdgeInsets.all(8.0),
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: ListTile(
+        title: Text(stationeryList[index].name,
+            style: TextStyle(fontWeight: FontWeight.w600)),
+        subtitle: Text('На складе: ${stationeryList[index].quantity}'),
+        trailing: Text(
+          '${stationeryList[index].price} ₽',
+          style: TextStyle(
+            fontSize: 15,
           ),
-          trailing: Column(
-            // spacing: 10.0,
-            children: [
-              Text(
-                '${stationeryList[index].price}₽',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                  fontSize: 14,
-                ),
-              ),
-              Text(
-                '${stationeryList[index].quantity.toString()} шт.',
-                style: TextStyle(
-                  color: Colors.grey,
-                ),
-              )
-            ],
-          ),
-        ));
+        ),
+      ),
+    );
   }
 
   ListView _buildBookList() {
+    updateListView();
     return ListView.builder(
       itemCount: itemCount,
       itemBuilder: (context, index) {
@@ -178,48 +164,25 @@ class _ItemListPageState extends State<ItemListPage> {
 
   Card bookCard(int index, BuildContext context) {
     return Card(
-        color: Colors.white,
-        elevation: 2.0,
-        child: ListTile(
-          leading: Icon(Icons.book_rounded),
-          title: Text(
-            bookList[index].title,
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              color: Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.normal,
-            ),
+      color: Color.fromARGB(255, 245, 235, 188),
+      margin: EdgeInsets.all(8.0),
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: ListTile(
+        title: Text(bookList[index].title,
+            style: TextStyle(fontWeight: FontWeight.w600)),
+        subtitle: Text(
+            'Автор: ${bookList[index].author}\nЖанр: ${bookList[index].genre}\nНа складе: ${bookList[index].quantity} '),
+        trailing: Text(
+          '${bookList[index].price} ₽',
+          style: TextStyle(
+            fontSize: 15,
           ),
-          subtitle: Text(
-            '${bookList[index].author} | ${bookList[index].genre}',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              color: Colors.grey,
-              fontSize: 12,
-            ),
-          ),
-          trailing: Column(
-            // spacing: 10.0,
-            children: [
-              Text(
-                '${bookList[index].price}₽',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                  fontSize: 14,
-                ),
-              ),
-              Text(
-                '${bookList[index].quantity.toString()} шт.',
-                style: TextStyle(
-                  color: Colors.grey,
-                ),
-              )
-            ],
-          ),
-        ));
+        ),
+      ),
+    );
   }
 
   FloatingActionButton buildFloatingButton() {
@@ -231,7 +194,7 @@ class _ItemListPageState extends State<ItemListPage> {
     );
   }
 
-  AppBar buildAppBar() {
+  AppBar _buildAppBar() {
     return AppBar(
       title: Text(categoryName!,
           style: TextStyle(
@@ -245,10 +208,6 @@ class _ItemListPageState extends State<ItemListPage> {
       actions: [
         IconButton(
             onPressed: () {}, icon: SvgPicture.asset('assets/icons/cart.svg')),
-        IconButton(
-          onPressed: () {},
-          icon: SvgPicture.asset('assets/icons/search-alt-1-svgrepo-com.svg'),
-        ),
       ],
     );
   }
