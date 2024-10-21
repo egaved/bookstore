@@ -22,7 +22,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => HomePage(),
         '/item_list': (context) => ItemListPage(),
-        // '/item_info': (context) => ItemInfoPage(),
         '/cart': (context) => CartPage(),
         '/add_item': (context) => AddItemPage(),
       },

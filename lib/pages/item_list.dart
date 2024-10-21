@@ -88,7 +88,9 @@ class _ItemListPageState extends State<ItemListPage> {
                 ),
               ],
             ).then((value) {
-              if (value == 'delete') {
+              if (value == 'toCart') {
+                _addItemToCart(stationeryList[index]);
+              } else if (value == 'delete') {
                 setState(() {
                   deleteStationery(stationeryList[index].id);
                 });
@@ -149,7 +151,9 @@ class _ItemListPageState extends State<ItemListPage> {
                 ),
               ],
             ).then((value) {
-              if (value == 'delete') {
+              if (value == 'toCart') {
+                _addItemToCart(bookList[index]);
+              } else if (value == 'delete') {
                 setState(() {
                   deleteBook(bookList[index].id);
                 });
@@ -207,7 +211,10 @@ class _ItemListPageState extends State<ItemListPage> {
       centerTitle: true,
       actions: [
         IconButton(
-            onPressed: () {}, icon: SvgPicture.asset('assets/icons/cart.svg')),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/cart');
+            },
+            icon: SvgPicture.asset('assets/icons/cart.svg')),
       ],
     );
   }
@@ -235,6 +242,44 @@ class _ItemListPageState extends State<ItemListPage> {
       content: Text(msg),
     );
     showDialog(context: context, builder: (_) => alertDialog);
+  }
+
+  void _addItemToCart(dynamic item) async {
+    bool isInCart = false;
+
+    if (item is Book) {
+      isInCart = await DbService().isItemInCart(item.id);
+      if (isInCart) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Товар уже в корзине')),
+          );
+        }
+      } else {
+        await DbService().addBookToCart(item.id, 1);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Книга добавлена в корзину')),
+          );
+        }
+      }
+    } else if (item is Stationery) {
+      isInCart = await DbService().isItemInCart(item.id);
+      if (isInCart) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Товар уже в корзине')),
+          );
+        }
+      } else {
+        await DbService().addStationeryToCart(item.id, 1);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Товар добавлен в корзину')),
+          );
+        }
+      }
+    }
   }
 
   void updateListView() {

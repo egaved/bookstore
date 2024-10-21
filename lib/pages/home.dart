@@ -172,7 +172,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ).then((value) {
-                if (value == 'toCart') {}
+                if (value == 'toCart') {
+                  _addItemToCart(item);
+                }
               });
             },
             child: item is Book ? _bookCard(item) : _stationeryCard(item),
@@ -180,6 +182,44 @@ class _HomePageState extends State<HomePage> {
         },
       ),
     );
+  }
+
+  void _addItemToCart(dynamic item) async {
+    bool isInCart = false;
+
+    if (item is Book) {
+      isInCart = await _dbService.isItemInCart(item.id);
+      if (isInCart) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Товар уже в корзине')),
+          );
+        }
+      } else {
+        await _dbService.addBookToCart(item.id, 1);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Книга добавлена в корзину')),
+          );
+        }
+      }
+    } else if (item is Stationery) {
+      isInCart = await _dbService.isItemInCart(item.id);
+      if (isInCart) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Товар уже в корзине')),
+          );
+        }
+      } else {
+        await _dbService.addStationeryToCart(item.id, 1);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Товар добавлен в корзину')),
+          );
+        }
+      }
+    }
   }
 
   Card _stationeryCard(Stationery item) {

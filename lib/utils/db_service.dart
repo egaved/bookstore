@@ -1,3 +1,4 @@
+import 'package:flutter_practice/models/cart_item.dart';
 import 'package:flutter_practice/models/stationery.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -76,6 +77,12 @@ class DbService {
     return res;
   }
 
+  Future<List<Map<String, dynamic>>> getCartMap() async {
+    Database db = await database;
+    var res = await db.query('cart');
+    return res;
+  }
+
   Future<int> createBook(Book book) async {
     var db = await database;
     var res = await db.insert('book', book.toMap());
@@ -116,6 +123,14 @@ class DbService {
     return res;
   }
 
+  Future<int?> getCartItemsAmount() async {
+    Database db = await database;
+    List<Map<String, dynamic>> x =
+        await db.rawQuery('''SELECT COUNT (*) FROM cart''');
+    int? res = Sqflite.firstIntValue(x);
+    return res;
+  }
+
   Future<List<Book>> fetchAllBooks() async {
     var bookMapList = await getBookMapList();
     int count = bookMapList.length;
@@ -125,6 +140,8 @@ class DbService {
     for (int i = 0; i < count; i++) {
       bookList.add(Book.fromMapObject(bookMapList[i]));
     }
+
+    bookList.sort((a, b) => a.title.compareTo(b.title));
 
     return bookList;
   }
@@ -139,7 +156,19 @@ class DbService {
       stationeryList.add(Stationery.fromMapObject(stMapList[i]));
     }
 
+    stationeryList.sort((a, b) => a.name.compareTo(b.name));
+
     return stationeryList;
+  }
+
+  Future<bool> isItemInCart(int id) async {
+    final db = await database;
+    final result = await db.query(
+      'cart',
+      where: 'product_id = ?',
+      whereArgs: [id],
+    );
+    return result.isNotEmpty;
   }
 
   Future<void> addBookToCart(int bookId, int quantity) async {
@@ -168,8 +197,8 @@ class DbService {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'book',
-      where: 'title LIKE ?',
-      whereArgs: ['%$query%'],
+      where: 'title LIKE ? OR genre LIKE ?',
+      whereArgs: ['%$query%', '%$query%'],
     );
 
     return List.generate(maps.length, (i) {
@@ -188,5 +217,58 @@ class DbService {
     return List.generate(maps.length, (i) {
       return Stationery.fromMapObject(maps[i]);
     });
+  }
+
+  Future<Map<Object, dynamic>> getBookById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'book',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return maps.first;
+    }
+    return {};
+  }
+
+  Future<Map<Object, dynamic>> getStationeryById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'stationery',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return maps.first;
+    }
+    return {};
+  }
+
+  Future<List<CartItem>> getCartItems() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('cart');
+    List<CartItem> cartItems = [];
+
+    for (var map in maps) {
+      if (map['product_type'] == 'book') {
+        final book = await getBookById(map['product_id']);
+        cartItems.add(CartItem.fromMapObject(map, book));
+      } else if (map['product_type'] == 'stationery') {
+        final stationery = await getStationeryById(map['product_id']);
+        cartItems.add(CartItem.fromMapObject(map, stationery));
+      }
+    }
+
+    return cartItems;
+  }
+
+  Future<void> deleteFromCart(int id) async {
+    final db = await database;
+    await db.delete(
+      'cart',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }
